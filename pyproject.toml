@@ -1,0 +1,33 @@
+[project]
+name = "keystone-verify"
+version = "0.1.0"
+description = "Standalone evaluation harness for governed AI systems. Points at any RAG or agent endpoint over HTTP. Part of the Keystone Applied Intelligence platform."
+requires-python = ">=3.11"
+dependencies = [
+    "httpx>=0.27.0",
+    "pydantic>=2.9.0",
+    "click>=8.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6.0",
+]
+
+[project.scripts]
+keystone-verify = "keystone_verify.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/keystone_verify"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100

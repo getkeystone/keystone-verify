@@ -1,0 +1,15 @@
+{
+  "name": "keystone-counsel",
+  "description": "Keystone Counsel: regulated content RAG for legal and financial advisory.",
+  "base_url": "http://localhost:8200",
+  "endpoint": "/counsel",
+  "method": "POST",
+  "timeout_s": 60,
+  "response_mapping": {
+    "answer_field": "answer",
+    "severity_field": "severity",
+    "citations_field": "citations",
+    "audit_hash_field": "audit_hash",
+    "fail_closed_field": "fail_closed"
+  }
+}
