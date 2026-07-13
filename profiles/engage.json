@@ -1,7 +1,7 @@
 {
   "name": "keystone-engage",
   "description": "Keystone Engage: governed conversational agent for regulated customer interaction.",
-  "base_url": "http://100.90.230.74:8100",
+  "base_url": "http://localhost:8100",
   "endpoint": "/engage",
   "method": "POST",
   "timeout_s": 60,
