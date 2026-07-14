@@ -131,8 +131,8 @@ keystone-verify run --profile profiles/engage.json --cases cases.jsonl --output 
 
 ## Relation to the rest of Keystone
 
-- [`keystone-engage`](https://docs.getkeystone.ai/extensions/engage/) uses this discipline for governed conversational agents.
-- [`keystone-counsel`](https://docs.getkeystone.ai/extensions/counsel/) uses it for authorization-first retrieval.
+- [`keystone-engage`] uses this discipline for governed conversational agents.
+- [`keystone-counsel`] uses it for authorization-first retrieval.
 - [`keystone-ledger`](https://github.com/getkeystone/keystone-ledger) tracks evaluation lineage and proof artifacts.
 
 ## License
