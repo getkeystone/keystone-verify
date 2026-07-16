@@ -111,18 +111,6 @@ def judge(
                 f"latency: expected <={assertions.max_latency_ms}ms, got {latency_ms:.0f}ms",
             )
 
-    # Cost (extracted from response if available)
-    cost_cents = None
-    # Cost is not in the response by default; future profiles may map it
-
-    if assertions.max_cost_cents is not None and cost_cents is not None:
-        if cost_cents > assertions.max_cost_cents:
-            passed = False
-            details = _join(
-                details,
-                f"cost: expected <={assertions.max_cost_cents}c, got {cost_cents}c",
-            )
-
     return Result(
         case_id=case.case_id,
         category=case.category,
@@ -136,5 +124,4 @@ def judge(
         fail_closed=fail_closed,
         audit_hash=audit_hash,
         citations_count=len(citations),
-        cost_cents=cost_cents,
     )

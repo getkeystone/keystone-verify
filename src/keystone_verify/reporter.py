@@ -1,7 +1,9 @@
-"""Reporter: write sealed evaluation artifacts.
+"""Reporter: write structured, reproducible evaluation artifacts.
 
 Produces results.json and run_metadata.json in the output directory.
-Same sealed artifact format as keystone-engage and keystone-counsel.
+Same artifact format as keystone-engage and keystone-counsel. These are
+plain JSON files: reproducible and inspectable, with no content-integrity
+seal or signature.
 """
 
 from __future__ import annotations
@@ -20,7 +22,7 @@ def write_artifacts(
     results: list[Result],
     output_dir: str | Path,
 ) -> Path:
-    """Write sealed evaluation artifacts to the output directory.
+    """Write structured evaluation artifacts to the output directory.
 
     Creates:
       {output_dir}/{run_id}/results.json
@@ -55,9 +57,6 @@ def write_artifacts(
         "latency": {
             "mean_ms": round(summary.mean_latency_ms, 1),
             "p95_ms": round(summary.p95_latency_ms, 1),
-        },
-        "cost": {
-            "total_cents": summary.total_cost_cents,
         },
     }
     metadata_path = output_path / "run_metadata.json"

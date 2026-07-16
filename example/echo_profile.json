@@ -1,0 +1,15 @@
+{
+  "name": "echo-httpbin",
+  "description": "Self-contained example profile. Targets httpbin.org/post, a public request-echo service, so the harness can be run end to end without any Keystone service. httpbin reflects the POST body back in its 'data' field, which this profile maps as the answer. The sample cases assert against that echoed request to demonstrate the harness mechanics, not to evaluate a real governed system. Requires outbound network access to httpbin.org.",
+  "base_url": "https://httpbin.org",
+  "endpoint": "/post",
+  "method": "POST",
+  "timeout_s": 30,
+  "response_mapping": {
+    "answer_field": "data",
+    "severity_field": "severity",
+    "citations_field": null,
+    "audit_hash_field": null,
+    "fail_closed_field": null
+  }
+}

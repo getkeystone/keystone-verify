@@ -2,6 +2,7 @@
 name = "keystone-verify"
 version = "0.1.0"
 description = "Standalone evaluation harness for governed AI systems. Points at any RAG or agent endpoint over HTTP. Part of the Keystone Applied Intelligence platform."
+license = "Apache-2.0"
 requires-python = ">=3.11"
 dependencies = [
     "httpx>=0.27.0",

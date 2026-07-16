@@ -59,7 +59,6 @@ class Assertions(BaseModel):
     has_citations: if true, citations list must be non-empty.
     fail_closed: if set, fail_closed field must match.
     max_latency_ms: response must arrive within this time.
-    max_cost_cents: cost field must not exceed this value.
     """
 
     severity: str | None = None
@@ -71,7 +70,6 @@ class Assertions(BaseModel):
     has_citations: bool | None = None
     fail_closed: bool | None = None
     max_latency_ms: int | None = None
-    max_cost_cents: float | None = None
 
 
 class Case(BaseModel):
@@ -104,7 +102,6 @@ class Result(BaseModel):
     fail_closed: bool | None = None
     audit_hash: str = ""
     citations_count: int = 0
-    cost_cents: float | None = None
 
 
 # --- Run summary ---
@@ -124,4 +121,3 @@ class RunSummary(BaseModel):
     by_bucket: dict[str, dict[str, int]] = Field(default_factory=dict)
     mean_latency_ms: float = 0.0
     p95_latency_ms: float = 0.0
-    total_cost_cents: float = 0.0

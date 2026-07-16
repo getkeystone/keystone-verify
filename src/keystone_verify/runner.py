@@ -88,8 +88,6 @@ def run(
         if r.passed:
             buc["passed"] += 1
 
-    total_cost = sum(r.cost_cents or 0 for r in results)
-
     summary = RunSummary(
         run_id=run_id,
         profile=profile.name,
@@ -101,7 +99,6 @@ def run(
         by_bucket=by_bucket,
         mean_latency_ms=sum(latencies) / len(latencies) if latencies else 0,
         p95_latency_ms=sorted_latencies[p95_idx] if sorted_latencies else 0,
-        total_cost_cents=total_cost,
     )
 
     # Print summary
@@ -113,7 +110,5 @@ def run(
     for buc, c in by_bucket.items():
         print(f"  {buc}: {c['passed']}/{c['total']}")
     print(f"Latency: mean={summary.mean_latency_ms:.0f}ms p95={summary.p95_latency_ms:.0f}ms")
-    if total_cost > 0:
-        print(f"Cost: {total_cost:.2f} cents total")
 
     return summary, results

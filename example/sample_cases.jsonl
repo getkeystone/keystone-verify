@@ -1,0 +1,10 @@
+# Sample cases for the echo-httpbin example profile (JSONL: one case per line).
+# Lines starting with # are ignored by the loader.
+# httpbin.org/post echoes the request body back in its "data" field, which the
+# echo profile maps as the answer. Cases echo-001..echo-004 pass; echo-005 is an
+# intentional failure that shows how the harness reports a failing assertion.
+{"case_id": "echo-001", "category": "contains", "description": "AND semantics: every listed substring must appear in the answer.", "request": {"message": "payment arrangement options"}, "assertions": {"contains": ["payment arrangement", "options"]}}
+{"case_id": "echo-002", "category": "contains_any", "description": "OR semantics: at least one listed substring must appear.", "request": {"message": "hardship program available"}, "assertions": {"contains_any": ["hardship", "bankruptcy"]}}
+{"case_id": "echo-003", "category": "absent", "description": "NONE semantics: none of the listed substrings may appear.", "request": {"message": "a safe compliant answer"}, "assertions": {"absent": ["error", "traceback"]}}
+{"case_id": "echo-004", "category": "min_length", "description": "The answer must be at least min_length characters long.", "request": {"message": "short"}, "assertions": {"min_length": 5}}
+{"case_id": "echo-005", "category": "severity", "description": "Intentional failure: httpbin returns no severity field, so severity reads 'unknown' and this assertion fails. Demonstrates that the harness surfaces failing cases with details.", "request": {"message": "demonstrates a failing assertion"}, "assertions": {"severity_in": ["ok", "tier_0"]}}

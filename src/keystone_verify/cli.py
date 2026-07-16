@@ -43,7 +43,7 @@ def main():
     "--output", "-o",
     default="results",
     type=click.Path(),
-    help="Output directory for sealed artifacts.",
+    help="Output directory for evaluation artifacts.",
 )
 @click.option(
     "--run-id",

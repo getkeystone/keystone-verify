@@ -1,140 +1,83 @@
 # Keystone Verify
 
-Standalone evaluation harness for governed AI systems.
+Evaluation harness for governed AI systems.
 
-Keystone Verify is the evaluation methodology behind the Keystone platform, extracted and released as a reusable tool. It points at any HTTP endpoint, runs declarative assertions against the responses, and produces sealed evaluation artifacts.
+## What this is
 
-This is not a benchmark vanity project and not a prompt-by-prompt spot check. It is infrastructure for proving whether a governed AI system actually behaves the way its builders claim.
+At the center of Keystone Verify is a judge: a pure function that takes a case, a response, a profile, and a latency measurement, and returns a result. It has no I/O and no side effects, so the same inputs always produce the same result. That makes the evaluation logic directly testable, and it is covered by 21 unit tests.
 
-## What it does
+Around that judge is an endpoint-agnostic harness. Point it at any HTTP endpoint, describe how to read that endpoint's responses in a profile, write cases with declarative assertions, and run them. The harness sends each request, scores each response with the judge, and writes structured, reproducible JSON artifacts.
 
-Verify takes two inputs:
+It is not a benchmark toy or a prompt-by-prompt spot check. It exists to prove whether a governed AI system behaves the way its builders claim: that it refuses when it should, cites what it should, and stays within its stated limits.
 
-- a **profile** describing how to talk to a target endpoint and how to map its response fields,
-- a **cases file** containing request payloads and declarative assertions.
+## How it works
 
-It sends requests, scores responses, and writes sealed outputs including per-case results and aggregate run metadata.
+Three inputs produce one result:
 
-The core judgment path is deliberately simple:
+- A profile (JSON) describes how to reach a target endpoint and how to map its response fields into the assertion vocabulary.
+- A cases file (JSONL, one case per line) contains request payloads and declarative assertions.
+- The judge scores each response against its case's assertions.
 
-**case + response + profile = result**
+The core path is `case + response + profile = result`, and the judge that computes it is a pure function. The runner handles HTTP and latency measurement, and the reporter writes the artifacts. The judgment itself is isolated and side-effect free.
 
-That judge is a pure function with no I/O, which makes the evaluation logic directly testable and reusable.
+## The judge
 
-## Why it exists
+`judge(case, response, profile, latency_ms)` returns a `Result`. It reads fields from the response using the profile's mapping, then checks the case's assertions:
 
-Most AI teams still evaluate systems informally:
+- `severity` (exact match) and `severity_in` (one of a set)
+- `min_length` (answer at least this long)
+- `contains` (AND: all substrings present)
+- `contains_any` (OR: at least one present)
+- `absent` (NONE: none present)
+- `has_citations` (citations list must be non-empty or empty)
+- `fail_closed` (fail-closed flag matches)
+- `max_latency_ms` (response within a time budget)
 
-- manual spot checks,
-- screenshots in docs,
-- one-off scripts,
-- failing cases overwritten by the latest passing run.
+The judge has no I/O and no side effects. It is deterministic, and it is covered by 21 unit tests in `tests/test_judge.py`. Because the judgment is a pure function, the evaluation logic can be tested directly, without a running endpoint.
 
-That is not enough for governed AI.
+## Running it
 
-Keystone Verify exists to make evaluation a first-class artifact. Systems should not only produce answers; they should produce evidence that they behave correctly, fail safely, and stay within operational constraints.
+Clone and install:
+
+```bash
+git clone https://github.com/getkeystone/keystone-verify
+cd keystone-verify
+pip install -e .
+```
+
+The `example/` directory contains a self-contained profile and cases that run against `httpbin.org/post`, a public request-echo service, so you can exercise the harness without any Keystone service running:
+
+```bash
+keystone-verify run \
+  --profile example/echo_profile.json \
+  --cases example/sample_cases.jsonl \
+  --output results/
+```
+
+Each case prints `PASS` or `FAIL` with a one-line reason for failures, followed by a summary. The run writes `results/<run_id>/results.json` and `results/<run_id>/run_metadata.json`. In this example, four cases pass and one (`echo-005`) fails on purpose to show how a failing assertion is reported. Running the example requires outbound network access to `httpbin.org`.
+
+The `profiles/` directory contains profiles that target the Keystone Engage and Counsel endpoints (`localhost:8100` and `localhost:8200`). Those require the corresponding services to be running. The example profile is the self-contained one.
+
+## Output format
+
+A run writes two structured JSON files under `results/<run_id>/`:
+
+- `results.json`: one entry per case with the outcome, the failure detail, latency, response length, and the extracted severity, citation count, and audit hash.
+- `run_metadata.json`: run-level statistics, including pass and fail counts, per-category and per-bucket breakdowns, and latency (mean and p95).
+
+These are plain JSON files. They are reproducible and inspectable after the run, rather than trapped in terminal output. They carry no content-integrity hash or signature.
 
 ## Platform role
 
-Keystone Verify is one extension in the broader Keystone platform:
+Keystone Verify is one of three extensions in the Keystone platform. Engage is a governed conversational agent for regulated customer interaction, and Counsel is authorization-first retrieval for regulated content. Verify runs against both, and against any other HTTP endpoint whose response shape can be described in a profile. It is the piece that turns platform claims into inspectable evidence.
 
-- **Engage** proves governed conversational AI for regulated customer interaction.
-- **Counsel** proves authorization-first retrieval for regulated content.
-- **Verify** proves the evaluation methodology itself as a portable tool.
+## Related repos
 
-It is the piece that turns platform claims into inspectable evidence.
-
-## What it evaluates
-
-Verify supports declarative assertions for:
-
-- severity,
-- content presence,
-- content alternatives,
-- forbidden content,
-- citations,
-- fail-closed behavior,
-- latency thresholds,
-- cost thresholds.
-
-This allows the same evaluation framework to test both retrieval systems and agent systems, as long as the endpoint’s response shape is described in a profile.
-
-## Why the profile model matters
-
-Verify does not hardcode one product’s schema.
-
-Profiles define:
-
-- endpoint URL,
-- HTTP method,
-- request shape,
-- field mapping from the target response into Verify’s assertion vocabulary.
-
-That means the same harness can evaluate different systems without rewriting the evaluator. Write a new profile, keep the same discipline.
-
-## What makes it different
-
-The goal is not only to measure quality. The goal is to preserve evidence.
-
-Verify is designed for:
-
-- reproducible eval runs,
-- sealed output artifacts,
-- explicit failing and passing lineage,
-- portable assertions across systems,
-- governance-relevant checks such as fail-closed behavior and citation presence.
-
-In the Keystone platform itself, this methodology was strong enough to surface real bugs in the systems it evaluated. That is the standard: evaluation should be able to embarrass the system, not flatter it.
-
-## Output artifacts
-
-A run produces sealed artifacts such as:
-
-- `results.json` — per-case outcomes,
-- `run_metadata.json` — aggregate statistics including latency and cost reporting.
-
-These artifacts make the result inspectable after the run, rather than leaving evaluation trapped in terminal output or dashboards.
-
-## Current use in Keystone
-
-Verify is used to evaluate the Keystone platform’s governed retrieval and governed agent systems. It supports the same discipline across the platform:
-
-- failing runs preserved alongside passing runs,
-- eval sets expanded through adversarial discovery,
-- claims tied to proof artifacts instead of presentation copy.
-
-## Current stack
-
-- Python
-- JSON / JSONL case definitions
-- HTTP-targeted evaluation
-- Pure-function judge core
-- CLI workflow
-
-## Repo goals
-
-This repository exists to prove that evaluation for governed AI can be treated as infrastructure.
-
-Specifically, it aims to show that:
-
-- evaluation logic can be profile-driven instead of product-specific,
-- governance-relevant assertions can be expressed declaratively,
-- failing evidence can be preserved instead of overwritten,
-- latency and cost can be evaluated alongside correctness,
-- the methodology itself can be portable across systems and domains.
-
-## Example CLI
-
-```bash
-keystone-verify run --profile profiles/engage.json --cases cases.jsonl --output out/
-```
-
-## Relation to the rest of Keystone
-
-- [`keystone-engage`](https://docs.getkeystone.ai/extensions/engage/) uses this discipline for governed conversational agents.
-- [`keystone-counsel`](https://docs.getkeystone.ai/extensions/counsel/) uses it for authorization-first retrieval.
-- [`keystone-ledger`](https://github.com/getkeystone/keystone-ledger) tracks evaluation lineage and proof artifacts.
+- [`keystone-ledger`](https://github.com/getkeystone/keystone-ledger): evaluation lineage and proof artifacts. Public shortly.
+- [`keystone-engage`](https://github.com/getkeystone/keystone-engage): governed conversational agent for regulated customer interaction. Public shortly.
+- [`keystone-gov`](https://github.com/getkeystone/keystone-gov): governed RAG reference implementation for regulated enterprise content. Public shortly.
+- `keystone-counsel`: authorization-first retrieval for regulated content. Private repo.
 
 ## License
 
-Apache 2.0
+Apache-2.0. See [LICENSE](LICENSE).
