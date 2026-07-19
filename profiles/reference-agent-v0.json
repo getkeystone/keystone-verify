@@ -1,0 +1,15 @@
+{
+  "name": "reference-agent-v0",
+  "description": "Reference profile for a hypothetical governed conversational agent endpoint. Vendor-neutral example, not a Keystone-internal service. It describes how to read the agent's response fields so the harness can score cases.",
+  "base_url": "http://localhost:9100",
+  "endpoint": "/v1/chat",
+  "method": "POST",
+  "timeout_s": 30,
+  "response_mapping": {
+    "answer_field": "reply",
+    "severity_field": "severity",
+    "citations_field": "sources",
+    "audit_hash_field": null,
+    "fail_closed_field": "refused"
+  }
+}

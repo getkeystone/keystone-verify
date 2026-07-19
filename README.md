@@ -1,5 +1,7 @@
 # Keystone Verify
 
+[![CI](https://github.com/getkeystone/keystone-verify/actions/workflows/ci.yml/badge.svg)](https://github.com/getkeystone/keystone-verify/actions/workflows/ci.yml)
+
 Evaluation harness for governed AI systems.
 
 ## What this is
@@ -77,6 +79,12 @@ Keystone Verify is one of three extensions in the Keystone platform. Engage is a
 - [`keystone-engage`](https://github.com/getkeystone/keystone-engage): governed conversational agent for regulated customer interaction. Public shortly.
 - [`keystone-gov`](https://github.com/getkeystone/keystone-gov): governed RAG reference implementation for regulated enterprise content. Public shortly.
 - `keystone-counsel`: authorization-first retrieval for regulated content. Private repo.
+
+## Links
+
+- Website: [getkeystone.ai](https://getkeystone.ai)
+- Public evaluation ledger: [keystone-ledger](https://github.com/getkeystone/keystone-ledger)
+- Changelog: [CHANGELOG.md](CHANGELOG.md)
 
 ## License
 

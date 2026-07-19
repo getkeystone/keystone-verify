@@ -50,7 +50,15 @@ def main():
     default=None,
     help="Override the auto-generated run ID.",
 )
-def run_cmd(profile: str, cases: str, output: str, run_id: str | None):
+@click.option(
+    "--content-checksum/--no-content-checksum",
+    default=False,
+    help=(
+        "Add an optional SHA-256 content_checksum to run_metadata.json for "
+        "detecting accidental modification. Off by default."
+    ),
+)
+def run_cmd(profile: str, cases: str, output: str, run_id: str | None, content_checksum: bool):
     """Run evaluation cases against a target endpoint."""
     p = load_profile(profile)
     c = load_cases(cases)
@@ -60,7 +68,7 @@ def run_cmd(profile: str, cases: str, output: str, run_id: str | None):
         return
 
     summary, results = run(p, c, run_id=run_id)
-    write_artifacts(summary, results, output)
+    write_artifacts(summary, results, output, content_checksum=content_checksum)
 
 
 # Alias so `keystone-verify run` works
