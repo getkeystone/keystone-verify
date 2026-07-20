@@ -3,6 +3,19 @@
 All notable changes to Keystone Verify are documented here. The format follows
 Keep a Changelog, and the project uses semantic versioning.
 
+## [Unreleased]
+
+### Added
+- `profiles/reference-legal-intake-v0.json` and
+  `profiles/reference-legal-intake-v0.cases.jsonl`: a vendor-neutral reference
+  profile for a hypothetical governed legal intake conversational agent, a
+  regulated, high-stakes domain distinct from the retrieval and generic-agent
+  profiles. Twelve cases spanning happy-path intake, unauthorized-practice-of-law
+  boundary escalation, adversarial probes, and ambiguous-urgency triage
+  escalation. No new judge types; uses the existing assertion vocabulary.
+- `tests/test_reference_legal_intake.py`: confirms the profile loads, the case
+  count, and the presence of escalation-expected and adversarial cases.
+
 ## [0.9.0] - 2026-07-19
 
 ### Added

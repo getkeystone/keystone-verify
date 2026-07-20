@@ -6,7 +6,7 @@ Evaluation harness for governed AI systems.
 
 ## What this is
 
-At the center of Keystone Verify is a judge: a pure function that takes a case, a response, a profile, and a latency measurement, and returns a result. It has no I/O and no side effects, so the same inputs always produce the same result. That makes the evaluation logic directly testable, and it is covered by 21 unit tests.
+At the center of Keystone Verify is a judge: a pure function that takes a case, a response, a profile, and a latency measurement, and returns a result. It has no I/O and no side effects, so the same inputs always produce the same result. That makes the evaluation logic directly testable, and it is covered by unit tests.
 
 Around that judge is an endpoint-agnostic harness. Point it at any HTTP endpoint, describe how to read that endpoint's responses in a profile, write cases with declarative assertions, and run them. The harness sends each request, scores each response with the judge, and writes structured, reproducible JSON artifacts.
 
@@ -35,7 +35,7 @@ The core path is `case + response + profile = result`, and the judge that comput
 - `fail_closed` (fail-closed flag matches)
 - `max_latency_ms` (response within a time budget)
 
-The judge has no I/O and no side effects. It is deterministic, and it is covered by 21 unit tests in `tests/test_judge.py`. Because the judgment is a pure function, the evaluation logic can be tested directly, without a running endpoint.
+The judge has no I/O and no side effects. It is deterministic, and it is covered by unit tests in `tests/test_judge.py`. Because the judgment is a pure function, the evaluation logic can be tested directly, without a running endpoint.
 
 ## Running it
 
@@ -60,6 +60,8 @@ Each case prints `PASS` or `FAIL` with a one-line reason for failures, followed 
 
 The `profiles/` directory contains profiles that target the Keystone Engage and Counsel endpoints (`localhost:8100` and `localhost:8200`). Those require the corresponding services to be running. The example profile is the self-contained one.
 
+The `profiles/` directory also includes vendor-neutral reference profiles for hypothetical governed endpoints, useful as templates when writing your own: `reference-agent-v0` (a generic governed conversational agent) and `reference-legal-intake-v0` (a governed legal intake agent that gathers facts and escalates to a licensed specialist rather than giving legal advice). Each ships with a companion `*.cases.jsonl` file that includes adversarial probe cases and fail-closed escalation cases.
+
 ## Output format
 
 A run writes two structured JSON files under `results/<run_id>/`:
@@ -75,10 +77,10 @@ Keystone Verify is one of three extensions in the Keystone platform. Engage is a
 
 ## Related repos
 
-- [`keystone-ledger`](https://github.com/getkeystone/keystone-ledger): evaluation lineage and proof artifacts. Public shortly.
-- [`keystone-engage`](https://github.com/getkeystone/keystone-engage): governed conversational agent for regulated customer interaction. Public shortly.
-- [`keystone-gov`](https://github.com/getkeystone/keystone-gov): governed RAG reference implementation for regulated enterprise content. Public shortly.
-- `keystone-counsel`: authorization-first retrieval for regulated content. Private repo.
+- [`keystone-engage`](https://github.com/getkeystone/keystone-engage): governed conversational agent for regulated customer interaction.
+- [`keystone-counsel`](https://github.com/getkeystone/keystone-counsel): authorization-first retrieval for regulated content.
+- [`keystone-gov`](https://github.com/getkeystone/keystone-gov): governed RAG reference implementation for regulated enterprise content.
+- [`keystone-ledger`](https://github.com/getkeystone/keystone-ledger): evaluation lineage and proof artifacts.
 
 ## Links
 
