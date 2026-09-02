@@ -27,12 +27,21 @@ def judge(
     Uses the profile's response_mapping to extract fields from the
     response dict. Runs each assertion in the case. Returns a Result
     with pass/fail and details.
+
+    min_length and the reported response_length are measured against
+    mapping.answer_field, unless mapping.length_source names a different
+    response field, in which case that field's value is measured instead.
+    Content assertions (contains, contains_any, absent) always read
+    answer_field regardless of length_source.
     """
     mapping = profile.response_mapping
     assertions = case.assertions
 
     # Extract fields using profile mapping
     answer = str(response.get(mapping.answer_field, ""))
+    length_subject = (
+        str(response.get(mapping.length_source, "")) if mapping.length_source else answer
+    )
     severity = str(response.get(mapping.severity_field, "unknown"))
     audit_hash = str(response.get(mapping.audit_hash_field, "")) if mapping.audit_hash_field else ""
     fail_closed = response.get(mapping.fail_closed_field) if mapping.fail_closed_field else None
@@ -57,9 +66,11 @@ def judge(
 
     # Minimum length
     if assertions.min_length > 0:
-        if len(answer) < assertions.min_length:
+        if len(length_subject) < assertions.min_length:
             passed = False
-            details = _join(details, f"length: expected >={assertions.min_length}, got {len(answer)}")
+            details = _join(
+                details, f"length: expected >={assertions.min_length}, got {len(length_subject)}"
+            )
 
     # Contains (AND)
     answer_lower = answer.lower()
@@ -117,7 +128,7 @@ def judge(
         bucket=case.bucket,
         passed=passed,
         latency_ms=latency_ms,
-        response_length=len(answer),
+        response_length=len(length_subject),
         details=details,
         pair_id=case.pair_id,
         severity=severity,

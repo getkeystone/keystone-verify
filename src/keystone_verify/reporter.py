@@ -1,9 +1,13 @@
-"""Reporter: write structured, reproducible evaluation artifacts.
+"""Reporter: write structured, inspectable evaluation artifacts.
 
 Produces results.json and run_metadata.json in the output directory.
 Same artifact format as keystone-engage and keystone-counsel. These are
-plain JSON files: reproducible and inspectable, with no content-integrity
-seal or signature.
+plain JSON files, inspectable after the run. They do not retain enough
+context (target commit, dependency versions, request/response bodies) to
+reconstruct the system under test, so they are not reproducible in that
+sense. run_metadata.json can optionally carry an unkeyed SHA-256
+content_checksum for detecting accidental modification; that is not a
+seal or signature. results.json is never checksummed.
 """
 
 from __future__ import annotations
@@ -65,16 +69,18 @@ def write_artifacts(
     output_dir: str | Path,
     content_checksum: bool = False,
 ) -> Path:
-    """Write structured evaluation artifacts to the output directory.
+    """Write structured, inspectable evaluation artifacts to the output directory.
 
     Creates:
       {output_dir}/{run_id}/results.json
       {output_dir}/{run_id}/run_metadata.json
 
-    When content_checksum is True, run_metadata.json carries an optional
-    SHA-256 content_checksum field for detecting accidental modification. It is
-    off by default and is not a cryptographic seal or tamper-evidence
-    mechanism.
+    When content_checksum is True, run_metadata.json (only) carries an
+    optional SHA-256 content_checksum field for detecting accidental
+    modification. It is off by default and is not a cryptographic seal,
+    signature, or tamper-evidence mechanism: an actor able to rewrite
+    run_metadata.json can recompute a matching checksum. results.json is
+    never checksummed.
     """
     output_path = Path(output_dir) / summary.run_id
     output_path.mkdir(parents=True, exist_ok=True)

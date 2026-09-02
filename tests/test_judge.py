@@ -158,3 +158,73 @@ class TestProfileMapping:
             100,
         )
         assert r.passed
+
+
+class TestLengthSource:
+    """length_source lets min_length/response_length measure a field other
+    than answer_field. Default (length_source=None) measures answer_field,
+    matching every other test in this file.
+    """
+
+    def test_default_measures_answer_field(self, profile):
+        """No regression: length_source unset still measures answer_field."""
+        r = judge(
+            _case({"min_length": 5}),
+            {"message": "Hello World!", "severity": "tier_0"},
+            profile,
+            100,
+        )
+        assert r.passed
+        assert r.response_length == len("Hello World!")
+
+    def test_length_source_measures_named_field(self):
+        """With length_source set, length checks read that field instead."""
+        p = Profile(
+            name="custom",
+            base_url="http://localhost",
+            endpoint="/custom",
+            response_mapping=ResponseMapping(
+                answer_field="summary",
+                length_source="full_text",
+            ),
+        )
+        response = {"summary": "short", "full_text": "a much longer field entirely"}
+        r = judge(_case({"min_length": 20}), response, p, 100)
+        assert r.passed
+        assert r.response_length == len("a much longer field entirely")
+
+    def test_length_source_fails_when_named_field_short(self):
+        """A short length_source field fails min_length even if answer_field
+        is long, confirming length_source is actually consulted rather than
+        silently falling back to answer_field.
+        """
+        p = Profile(
+            name="custom",
+            base_url="http://localhost",
+            endpoint="/custom",
+            response_mapping=ResponseMapping(
+                answer_field="summary",
+                length_source="full_text",
+            ),
+        )
+        response = {"summary": "this summary field is plenty long on its own", "full_text": "x"}
+        r = judge(_case({"min_length": 20}), response, p, 100)
+        assert not r.passed
+        assert r.response_length == 1
+
+    def test_length_source_does_not_affect_contains(self):
+        """contains/contains_any/absent always read answer_field, regardless
+        of length_source.
+        """
+        p = Profile(
+            name="custom",
+            base_url="http://localhost",
+            endpoint="/custom",
+            response_mapping=ResponseMapping(
+                answer_field="summary",
+                length_source="full_text",
+            ),
+        )
+        response = {"summary": "contains the keyword", "full_text": "unrelated content"}
+        r = judge(_case({"contains": ["keyword"]}), response, p, 100)
+        assert r.passed

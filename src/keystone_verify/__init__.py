@@ -1,9 +1,8 @@
-"""Keystone Verify: standalone evaluation harness for governed AI systems.
+"""Keystone Verify: standalone evaluation infrastructure for governed AI systems.
 
-Points at any RAG or agent endpoint over HTTP. Runs declarative assertions
-against responses. Produces structured, reproducible evaluation artifacts.
-
-Part of the Keystone Applied Intelligence platform.
+Evaluates compatible HTTP endpoints whose JSON request/response shapes can be
+represented by a Verify profile. Runs declarative assertions against
+responses. Produces structured, inspectable evaluation artifacts.
 """
 
 __version__ = "0.9.0"

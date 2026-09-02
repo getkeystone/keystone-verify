@@ -5,9 +5,12 @@ Case: what to send and what to assert about the response.
 Result: what happened when a case ran.
 RunSummary: aggregate statistics for a complete run.
 
-The profile is the abstraction that makes the harness endpoint-agnostic.
-The same case format works across Engage, Counsel, or any endpoint
-whose response shape is described in a profile.
+The profile is the abstraction that lets the same case format work across
+Engage, Counsel, or any other compatible endpoint: one whose JSON
+request/response shape can be represented by a Profile and ResponseMapping
+(one base URL and endpoint, a JSON request body, and a fixed set of
+top-level response fields). It does not support request headers, auth,
+nested-path field extraction, or non-JSON responses.
 """
 
 from __future__ import annotations
@@ -29,7 +32,9 @@ class ResponseMapping(BaseModel):
     citations_field: str | None = "evidence"
     audit_hash_field: str | None = "audit_hash"
     fail_closed_field: str | None = None
-    length_source: str | None = None  # if None, uses len(answer_field)
+    # min_length and response_length measure this field instead of
+    # answer_field when set. If None, they measure answer_field.
+    length_source: str | None = None
 
 
 class Profile(BaseModel):

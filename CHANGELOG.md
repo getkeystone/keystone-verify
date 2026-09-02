@@ -5,6 +5,54 @@ Keep a Changelog, and the project uses semantic versioning.
 
 ## [Unreleased]
 
+### Fixed
+- `ResponseMapping.length_source` was defined but never read; `min_length`
+  and `response_length` always measured `answer_field`. `judge.py` now
+  measures `length_source` when a profile sets it, matching the field's
+  documented intent. `contains`/`contains_any`/`absent` are unaffected and
+  still always read `answer_field`. Covered by new tests in
+  `tests/test_judge.py`.
+
+### Changed
+- README, package docstrings, and `pyproject.toml` no longer describe
+  Verify as endpoint-agnostic or able to target "any HTTP endpoint" / "any
+  RAG or agent endpoint." It evaluates compatible endpoints: ones whose
+  JSON request/response shapes can be represented by a Verify profile.
+  Documented the concrete boundary (one base URL/endpoint, JSON body, a
+  fixed set of top-level response fields; no headers, auth, nested-path
+  extraction, or non-JSON responses).
+- README no longer says Verify exists to "prove" that a system behaves as
+  claimed. Replaced with: it evaluates whether observed responses satisfy
+  the assertions defined in a given set of cases and profile, and a
+  passing run does not establish general correctness, production
+  suitability, safety, or independent validation.
+- README and `reporter.py` no longer call artifacts "reproducible."
+  `results.json` and `run_metadata.json` do not retain request/response
+  bodies, target commit, model version, or Verify's own version, so they
+  do not support reconstructing the system under test. Now described as
+  "structured, inspectable" run artifacts.
+- README corrected: artifacts are not universally free of any
+  content-integrity mechanism. `--content-checksum` adds an unkeyed
+  SHA-256 checksum to `run_metadata.json` only (off by default); documented
+  exactly what that does and does not establish, and that `results.json`
+  is never checksummed.
+- Removed "one of three extensions in the Keystone platform" and "the
+  piece that turns platform claims into inspectable evidence." Verify is
+  standalone evaluation infrastructure that can evaluate Engage, Counsel,
+  or other compatible endpoints; it does not run inside their served path
+  or imply a shared runtime.
+- Related-repo descriptions aligned with current framing (Engage and
+  Counsel as independently composed reference implementations, Gov as a
+  governed retrieval reference implementation, Ledger as retained internal
+  evaluation artifacts and lineage rather than "proof artifacts").
+- Documented that the runner does not call `raise_for_status()`: a 4xx/5xx
+  response with a valid JSON body is judged like a 200. Documented that a
+  non-JSON response or request failure is recorded with `latency_ms=0`
+  rather than the latency measured before the failure, and that
+  `p95_latency_ms` is an approximation (`int(n * 0.95)` in the sorted
+  list), not a statistically rigorous percentile method. No behavior
+  changed; this was previously undocumented.
+
 ### Added
 - `profiles/reference-legal-intake-v0.json` and
   `profiles/reference-legal-intake-v0.cases.jsonl`: a vendor-neutral reference
